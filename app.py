@@ -1,5 +1,8 @@
 from flask import Flask, request, render_template, jsonify, session
 import os
+from config import load_config  # Import from config.py
+from api_key import get_api_key  # Import from api_key.py
+
 import logging
 import json
 import faiss
@@ -29,37 +32,18 @@ model = None  # SentenceTransformer model
 data = None  # Loaded data from file
 
 
-def load_config(config_file=CONFIG_FILE):
-    try:
-        with open(config_file, 'r') as file:
-            config = json.load(file)
-        required_keys = ['file_path', 'model']
-        for key in required_keys:
-            if key not in config:
-                logging.error(f"Missing required configuration key: {key}")
-                return None
-        return config
-    except FileNotFoundError:
-        logging.error("Configuration file not found.")
-        return None
-    except json.JSONDecodeError as e:
-        logging.error(f"Error decoding JSON configuration file: {e}")
-        return None
-    except Exception as e:
-        logging.error(f"Unexpected error while loading configuration: {e}")
-        return None
+# --- Configuration ---
+config = load_config()
+if not config:
+    logging.error("Failed to load configuration. Exiting.")
+    exit(1)
 
 
-def get_api_key():
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        logging.error("""
-        OpenAI API key not found.
-
-        Please set the environment variable 'OPENAI_API_KEY' with your key.
-        """)
-        return None
-    return api_key
+# --- API Key ---
+api_key = get_api_key()
+if not api_key:
+    logging.error("Failed to retrieve API key. Exiting.")
+    exit(1)
 
 
 def retry_on_exception(exception):
