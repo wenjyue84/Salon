@@ -1,4 +1,6 @@
 {
     "file_path": "data.txt",
-    "model": "gpt-4"
+    "model": "gpt-4",
+    "prompt_limit": 100,
+    "answer_limit": 200
 }
